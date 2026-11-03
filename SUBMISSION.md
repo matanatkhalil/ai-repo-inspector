@@ -107,6 +107,8 @@ Final check of all standard commands passed:
 
 The tests cover repository selection with paths containing spaces, shared input rejection, stdout/stderr preservation, continuation after failures, output limits, timeout classification, report statuses, and actual CLI/MCP behavior. The timeout regression uses a fake clock with real subprocess I/O, rather than waiting 120 seconds.
 
+Also, after pushing the commits to GitHub, GitHub CI initially failed because the dependency lockfile was incomplete. I repaired it using npm 10, verified a clean `npm ci`, and reran typechecking, build, and all nine tests successfully. After pushing the repaired lockfile, GitHub CI passed.
+
 ## A blocker you hit and how you approached it
 Halfway through the project, my VS Code editor showed missing Node types (`node:fs` and `process`). These missing Node APIs were reported in `cli.ts`. I checked command-line typechecking and confirmed the dependencies were installed: typechecking passed and `@types/node` was present; therefore, this suggested an editor/project-resolution issue rather than a code defect. To solve this, I switched VS Code settings to the workspace TypeScript version to align editor diagnostics with the project’s compiler. And as a result, those red error lines disappeared from `cli.ts`. 
 
