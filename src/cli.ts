@@ -6,7 +6,7 @@ type Args = {
   command: string;
   repositoryPath?: string;
   baseRef?: string;
-  format?: "markdown" | "json";
+  format?: "markdown";
   validations: string[];
 };
 
@@ -14,14 +14,24 @@ function parseArgs(argv: string[]): Args {
   const args: Args = { command: argv[0] ?? "", validations: [] };
   for (let index = 1; index < argv.length; index++) {
     const token = argv[index];
+    if (!["--repo", "--base-ref", "--format", "--validate"].includes(token)) {
+      throw new Error(`Unknown argument: ${token}`);
+    }
+    const value = argv[++index];
+    if (value === undefined || value.trim().length === 0 || value.startsWith("--")) {
+      throw new Error(`Missing or invalid value for ${token}.`);
+    }
     if (token === "--repo") {
-      args.repositoryPath = argv[++index];
+      args.repositoryPath = value;
     } else if (token === "--base-ref") {
-      args.baseRef = argv[++index];
+      args.baseRef = value;
     } else if (token === "--format") {
-      args.format = argv[++index] as Args["format"];
+      if (value !== "markdown") {
+        throw new Error("Only markdown format is supported.");
+      }
+      args.format = value;
     } else if (token === "--validate") {
-      args.validations.push(argv[++index]);
+      args.validations.push(value);
     }
   }
   return args;
@@ -30,7 +40,7 @@ function parseArgs(argv: string[]): Args {
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args.command !== "review" || !args.repositoryPath) {
-    console.error("Usage: inspector review --repo <path> [--base-ref <ref>] [--validate <command>]");
+    console.error("Usage: inspector review --repo <path> [--base-ref <ref>] [--format markdown] [--validate <command>]");
     process.exitCode = 1;
     return;
   }

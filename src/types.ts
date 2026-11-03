@@ -9,13 +9,14 @@ export type ValidationResult = {
   output: string;
   exitCode?: number | null;
   error?: string;
+  failureReason?: "command" | "timeout" | "output-limit";
 };
 
 export type ReviewRequest = {
   repositoryPath: string;
   baseRef?: string;
   validationCommands?: string[];
-  format?: "markdown" | "json";
+  format?: "markdown";
 };
 
 export type ReviewResult = {

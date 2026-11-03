@@ -64,6 +64,27 @@ As expected:
 - The report contained stdout 111 and stderr 222.
 - Exit code was 0.
 
+I ran each of these separately:
+
+- npm run inspector -- review --repo "." --validate
+- npm run inspector -- review --repo "." --format json
+- npm run inspector -- review --repo "." --unknown
+
+And as expected, each printed a clear error and exited nonzero; they did not generate or overwrite a report.
+
+I also manually checked output limits and continuation by running:
+`npm run inspector -- review --repo "." --base-ref HEAD --validate "node -e process.stdout.write(String.fromCharCode(120).repeat(1100000))" --validate "node -p 42"`
+
+And as expected, the report showed:
+- First command: failed, reason output-limit.
+- Second command: passed, output 42.
+
+And running `$LASTEXITCODE` immediately afterward gave the output of `1` which means a validation failed or the inspector encountered an error (as expected).
+
+And lastly, I checked the build executable with the command:
+`node .\dist\src\cli.js review --repo "." --base-ref HEAD --validate "node -p 42"`
+
+And the result was as expected: a report and exit code 0 (`passed`).
 
 ## A blocker you hit and how you approached it
 

@@ -22,6 +22,10 @@ export function markdownReport(input: ReportInput): string {
       lines.push(`Exit code: ${result.exitCode ?? "unavailable"}`);
     }
 
+    if (result.failureReason) {
+      lines.push(`Failure reason: ${result.failureReason}`);
+    }
+
     lines.push("```", result.output || "(no output)", "```");
 
     if (result.error) {
