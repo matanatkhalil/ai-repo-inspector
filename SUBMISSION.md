@@ -94,6 +94,8 @@ And the result was as expected: a report and exit code 0 (`passed`).
 - Git inspection: Includes committed changes from the merge base of the selected base reference and `HEAD` to `HEAD`. Staged, unstaged, and untracked changes are excluded.
 - Validation: Commands run against the current working tree rather than a snapshot of the committed changes being inspected. Consequently, validation results may reflect uncommitted modifications.
 - Validation security: Validation commands execute with the permissions and environment of the inspector process. They are not sandboxed, so only trusted commands should be executed.
+- Git parsing: renames and unusual filenames can be reported incorrectly.
+- Markdown formatting: command output containing triple backticks can break report formatting.
 
 ## Approximate focused-work time
 
