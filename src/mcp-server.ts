@@ -10,17 +10,19 @@ server.tool(
   "review_repository",
   "Inspects a Git repository and returns a review report.",
   {
-    repo_path: z.string().describe("Repository path to inspect."),
+    repo_path: z.string().min(1).describe("Repository path to inspect."),
     baseRef: z.string().optional(),
     validationCommands: z.array(z.string()).optional(),
   },
-  async (input: any) => {
-    const report = await reviewRepository({
-      repositoryPath: input.repoPath,
+  async (input) => {
+    const result = await reviewRepository({
+      repositoryPath: input.repo_path,
       baseRef: input.baseRef,
       validationCommands: input.validationCommands,
     });
-    return { content: [{ type: "text", text: report }] };
+    return {
+      content: [{ type: "text", text: result.report }],
+    };
   },
 );
 
