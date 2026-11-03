@@ -4,6 +4,11 @@ This is a small TypeScript developer tool that inspects changes in a Git
 repository, runs optional validation commands, and produces a Markdown report.
 It can be used from a command line or exposed to AI clients through MCP.
 
+The tool supports both CLI and stdio MCP usage for trusted local developers and coding agents. Both interfaces use the same review pipeline.
+
+## Review scope 
+By default, the tool compares committed changes from the merge base of `main` and `HEAD` to `HEAD`. Use `--base-ref` or MCP’s `baseRef` to select another base. Staged, unstaged, and untracked changes are excluded. Validation commands run against the current working tree, so their results may reflect uncommitted edits. The selected base reference must exist in the repository.
+
 ## Your task
 
 Investigate the repository and improve it as you judge best. The starter works
@@ -52,7 +57,7 @@ npm run inspector -- review --repo ./path/to/repo --format markdown
 npm run inspector -- review --repo ./path/to/repo --validate "npm test"
 ```
 
-The report is written to `review-report.md`.
+The CLI writes `review-report.md` in its current working directory, overwriting an existing file. It exits with `0` when no validations fail and the review succeeds, or `1` for validation failures or operational errors. Validation failures still produce a report; operational errors may prevent one. Only Markdown output is supported. 
 
 ## MCP
 
@@ -62,9 +67,18 @@ Start the stdio server with:
 npm run mcp-server
 ```
 
-It exposes a `review_repository` tool. Inspect the implementation to determine
-its current input contract and whether it is suitable for the production model
-you propose.
+The `review_repository` tool requires `repo_path`; the other fields are optional. It returns a Markdown report as text without writing a report file. Failed validations appear in the report; invalid inputs or repository errors return tool errors.
+
+```json
+{
+  "repo_path": "/absolute/path/to/repository",
+  "baseRef": "main",
+  "validationCommands": ["npm test"]
+}
+```
+
+## Validation limits and trust
+Validation commands run sequentially, and later commands continue after a failure. Each command has a 120-second timeout that requests termination and a 1 MiB output-buffer limit per stream. Descendant processes may continue running and delay completion. Commands inherit the inspector’s permissions and environment; only trusted commands, project scripts, and MCP clients should be used. Execution is not sandboxed.
 
 ## Project layout
 
@@ -75,7 +89,7 @@ src/mcp-server.ts   MCP adapter
 src/git.ts          Git inspection
 src/validation.ts   validation execution
 src/report.ts       Markdown report generation
-test/               public starter tests
+test/               regression and CLI/MCP integration tests
 ```
 
 When finished, submit via **Security → Report a vulnerability** on this
